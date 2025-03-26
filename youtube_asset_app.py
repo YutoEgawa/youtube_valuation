@@ -9,6 +9,10 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 import io
+import json
+
+creds_dict = json.loads(st.secrets["gcp_service_account"])
+creds = service_account.Credentials.from_service_account_info(creds_dict)
 
 # 🌐 Language switcher
 language = st.radio("🌐 Select Language / 言語を選んでください", ("Japanese", "English"))
