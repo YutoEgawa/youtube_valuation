@@ -303,11 +303,14 @@ def valuation(df_merged, growth_slowdown_1st, growth_slowdown_2nd, growth_slowdo
 
 def upload_csv_to_drive(file, username="anonymous"):
     SCOPES = ['https://www.googleapis.com/auth/drive.file']
-    creds = service_account.Credentials.from_service_account_file(
-        "credentials.json", scopes=SCOPES
-    )
+
+    # ✅ `st.secrets` から GCP の認証情報を取得
+    creds_dict = json.loads(st.secrets["gcp_service_account"])
+    creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+
     service = build('drive', 'v3', credentials=creds)
 
+    # 🔽 ファイル名を生成（ユーザー名 + タイムスタンプ）
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{username}_{timestamp}_{file.name}"
@@ -315,10 +318,10 @@ def upload_csv_to_drive(file, username="anonymous"):
     file_data = io.BytesIO(file.getvalue())
     media = MediaIoBaseUpload(file_data, mimetype='text/csv')
 
-    # 🔽 保存先フォルダIDを指定（ここを変更）
+    # 📂 Google Drive の保存先フォルダ ID
     file_metadata = {
         'name': filename,
-        'parents': ['1QiQ9s9xj3rCBbNBBauxSTP8sLKogHT1o']  # ← あなたのフォルダIDに置き換え
+        'parents': ['1QiQ9s9xj3rCBbNBBauxSTP8sLKogHT1o']  # あなたのフォルダIDに変更
     }
 
     uploaded = service.files().create(
